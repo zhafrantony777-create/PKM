@@ -1,0 +1,1382 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perpustakaan QR - Demo UI</title>
+  <style>
+    /* [Gaya dasar tidak berubah, hanya penyesuaian tata letak] */
+    body {
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      background: #f8fafc;
+      color: #222;
+    }
+
+    header {
+      background: #2b6cb0;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+    }
+
+    header h1 {
+      font-size: 18px;
+      margin: 0;
+    }
+
+    .menu-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 22px;
+      cursor: pointer;
+    }
+
+    /* Popup Menu */
+    #popupMenu {
+      display: none;
+      position: absolute;
+      top: 48px;
+      right: 10px;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    #popupMenu button {
+      display: block;
+      width: 100%;
+      background: none;
+      border: none;
+      padding: 10px 16px;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    #popupMenu button:hover {
+      background: #e2e8f0;
+    }
+
+    /* Login */
+    #loginPage {
+      display: none;
+      max-width: 400px;
+      margin: 60px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    #loginPage h2 {
+      text-align: center;
+    }
+
+    #loginPage input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    #loginPage button {
+      width: 100%;
+      background: #2b6cb0;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    /* Operator Layout */
+    #operatorPage {
+      display: none;
+      height: 100vh;
+    }
+
+    .operator-content {
+      display: flex;
+      height: 100%;
+    }
+
+    /* Kontainer baru untuk sidebar + main content */
+    .sidebar {
+      width: 220px;
+      background: #2b6cb0;
+      color: white;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar h3 {
+      text-align: center;
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .sidebar button {
+      background: none;
+      border: none;
+      color: white;
+      padding: 12px 20px;
+      text-align: left;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    .sidebar button.active,
+    .sidebar button:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .main {
+      flex: 1;
+      padding: 20px;
+      overflow: auto;
+      text-align: left;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th,
+    td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background: #e2e8f0;
+    }
+
+    /* Gaya Halaman Siswa */
+    #scanPage {
+      max-width: 500px;
+      margin: auto;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .placeholder-info {
+      padding: 15px;
+      background: #e2e8f0;
+      border-left: 5px solid #2b6cb0;
+      margin-top: 20px;
+      text-align: left;
+      border-radius: 4px;
+    }
+
+    .main h2 {
+      margin-top: 0;
+      margin-bottom: 20px;
+    }
+
+    .settings-box {
+      background: #f4f4f4;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+
+    .settings-box input {
+      width: 100%;
+      padding: 8px;
+      margin: 5px 0 15px;
+      border: 1px solid #aaa;
+      border-radius: 6px;
+    }
+
+
+    /* TOGGLE SWITCH (Dark Mode) */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+    }
+
+    .dark input {
+      background: #222;
+      color: white;
+      border-color: #555;
+    }
+
+    .dark .settings-box {
+      background: #333;
+      color: white;
+    }
+
+    .switch input {
+      display: none;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 24px;
+      height: 24px;
+      width: 50px;
+    }
+
+    .slider:before {
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      position: absolute;
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked+.slider {
+      background-color: #4a90e2;
+    }
+
+    input:checked+.slider:before {
+      transform: translateX(26px);
+    }
+
+    /* DARK MODE STYLE */
+    body.dark {
+      background: #1d1d1d;
+      color: white;
+    }
+
+    .password-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .password-wrapper input {
+      width: 100%;
+      padding-right: 35px;
+    }
+
+    .toggle-eye {
+      position: absolute;
+      right: 10px;
+      cursor: pointer;
+      user-select: none;
+      font-size: 16px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header id="mainHeader">
+    <h1 id="headerTitle">📚 Sistem Perpustakaan</h1>
+    <button class="menu-btn" onclick="toggleMenu()">⋮</button>
+    <div id="popupMenu">
+      <button onclick="openLogin()">Masuk Operator</button>
+    </div>
+  </header>
+
+  <div id="scanPage">
+    <h2>Ayo Pinjam Buku! 🚀</h2>
+    <div class="placeholder-info">
+      <p><strong>Langkah 1:</strong> Scan QR Code Akses di dinding menggunakan kamera HP Anda.</p>
+      <p><strong>Langkah 2:</strong> Isi data diri Anda dan pilih buku yang dipinjam dari daftar.</p>
+      <p><strong>Langkah 3:</strong> Selesai! Klik "Konfirmasi Peminjaman" untuk mencatat transaksi.</p>
+    </div>
+
+    <div id="scanButtonContainer" style="margin-top: 30px;">
+      <button onclick="showInputPageWithSelection()"
+        style="background:#48bb78; color:white; border:none; padding:15px 30px; border-radius:8px; font-size: 18px; cursor:pointer; margin-bottom:15px;">
+        MULAI PINJAM BUKU (Akses Formulir)
+      </button>
+      <button onclick="startScanningUserAction()"
+        style="background:#2b6cb0; color:white; border:none; padding:15px 30px; border-radius:8px; font-size: 18px; cursor:pointer;">
+        SCAN QR DENGAN KAMERA WEB
+      </button>
+    </div>
+
+    <div id="reader" style="width: 100%; max-width: 400px; margin: 20px auto; display: none;"></div>
+    <div id="scan-result" style="margin-top: 10px; font-weight: bold;"></div>
+  </div>
+
+  <div id="inputDataPage"
+    style="display:none; max-width:500px; margin:40px auto; padding:20px; background:white; border-radius:12px; box-shadow:0 0 10px rgba(0,0,0,0.1);">
+    <h2>📝 Lengkapi Data Peminjam & Pilih Buku</h2>
+
+    <label for="selectBook">Pilih Buku yang Akan Dipinjam (Tersedia):</label>
+    <select id="selectBook" style="width:100%; padding:10px; margin:8px 0; border:1px solid #ccc; border-radius:8px;">
+    </select>
+
+    <label for="peminjamNama">Nama Lengkap:</label>
+    <input type="text" id="peminjamNama" placeholder="Masukkan Nama Lengkap Anda"
+      style="width:100%; padding:10px; margin:8px 0; border:1px solid #ccc; border-radius:8px;">
+
+    <label for="peminjamKelas">Kelas:</label>
+    <input type="text" id="peminjamKelas" placeholder="Contoh: X RPL, XI TKJ"
+      style="width:100%; padding:10px; margin:8px 0; border:1px solid #ccc; border-radius:8px;">
+    <button onclick="confirmPeminjaman()" id="confirmButton"
+      style="width:100%; background:#2b6cb0; color:white; border:none; padding:12px; border-radius:8px; cursor:pointer; margin-top:15px;">Konfirmasi
+      Peminjaman</button>
+    <button onclick="setView('siswa')"
+      style="width:100%; background:#e53e3e; color:white; border:none; padding:10px; border-radius:8px; cursor:pointer; margin-top:10px;">Batal
+      & Kembali</button>
+  </div>
+
+  <div id="loginPage">
+    <h2>Login Operator</h2>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="login()">Masuk</button>
+    <p style="text-align:center; margin-top:15px;"><a href="#" onclick="showStudentPage()">Kembali ke Halaman Siswa</a>
+    </p>
+  </div>
+
+  <div id="operatorPage">
+    <div class="operator-content">
+      <div class="sidebar">
+        <h3 id="operatorTitle">OPERATOR</h3>
+        <button onclick="showMenu('dashboard', this)" class="active">🏠 Dashboard</button>
+        <button onclick="showMenu('peminjaman', this)">📗 Peminjaman Aktif</button>
+        <button onclick="showMenu('terlambat', this)">⏰ Keterlambatan</button>
+        <button onclick="showMenu('buku', this)">📖 Katalog Buku</button>
+        <button onclick="showMenu('siswa', this)">👨‍🎓 Daftar Siswa</button>
+        <button onclick="showMenu('riwayat', this)">🕓 Riwayat</button>
+        <button onclick="showMenu('qr_akses', this)">📱 QR Akses Peminjaman</button>
+        <div style="margin-top: auto;">
+          <button onclick="showMenu('pengaturan', this)">⚙️ Pengaturan</button>
+          <button onclick="logout()">🚪 Logout</button>
+        </div>
+      </div>
+      <div class="main" id="mainContent">
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Form Tambah Data -->
+  <div id="formModal" style="display:none;
+    position:fixed; top:0; left:0; right:0; bottom:0;
+    background:rgba(0,0,0,0.4); z-index:999;
+    align-items:center; justify-content:center;">
+    <div
+      style="background:white; padding:20px; border-radius:8px; min-width:300px; box-shadow:0 0 10px rgba(0,0,0,0.3);">
+      <h3 id="formTitle">Tambah Data</h3>
+      <div id="formFields"></div>
+      <button onclick="submitForm()"
+        style="background:#2b6cb0;color:white;border:none;padding:8px 12px;border-radius:4px;cursor:pointer;">Simpan</button>
+      <button onclick="closeForm()"
+        style="background:#e53e3e;color:white;border:none;padding:8px 12px;border-radius:4px;cursor:pointer;margin-left:5px;">Batal</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.4/html5-qrcode.min.js"></script>
+  <script>
+    // Variabel Global
+    const bukuDummy = [
+      { id: 1, judul: "Contoh Buku A", pengarang: "Penulis X", rak: "A1", stok: 5 },
+      { id: 2, judul: "Contoh Buku B", pengarang: "Penulis Y", rak: "C3", stok: 3 }
+    ];
+    const peminjamanDummy = []; // Boleh kosong
+    let html5QrCode;
+    const mainHeader = document.getElementById("mainHeader");
+    const scanPage = document.getElementById("scanPage");
+    const inputDataPage = document.getElementById("inputDataPage");
+    const loginPage = document.getElementById("loginPage");
+    const operatorPage = document.getElementById("operatorPage");
+    const headerTitle = document.getElementById("headerTitle");
+    const API_BASE_URL = "http://localhost/PKMv2/api/";
+    let bukuData = [];
+    let peminjamanData = []; // Menyimpan semua riwayat pinjam (ya & tidak)
+    let activePeminjaman = []; // Menyimpan pinjaman yang dikembalikan = 'tidak'
+
+    // Data Siswa Dummy (untuk testing jika gagal load dari siswa.json)
+    function toggleMenu() {
+      const popup = document.getElementById('popupMenu');
+      // Jika style-nya display:none, ubah menjadi block, dan sebaliknya.
+      if (popup.style.display === 'block') {
+        popup.style.display = 'none';
+      } else {
+        popup.style.display = 'block';
+      }
+    }
+
+    function showStudentPage() {
+      setView('siswa');
+    }
+
+    // --- FUNGSI SCANNER (GLOBAL SCOPE) --- 
+
+    function initHtml5QrCode() {
+      if (!html5QrCode) {
+        html5QrCode = new Html5Qrcode("reader");
+      }
+    }
+
+    function startScanner() {
+      initHtml5QrCode();
+
+      const qrCodeSuccessCallback = (decodedText, decodedResult) => {
+        stopScanner();
+        // Setelah scan QR Akses, langsung panggil showInputPageWithSelection
+        // Teks yang didekodekan (decodedText) diabaikan karena ini adalah QR Akses
+        showInputPageWithSelection();
+      };
+
+      // Konfigurasi scanner
+      const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+      const scanResult = document.getElementById("scan-result");
+
+      scanResult.innerHTML = "Kamera sedang dimuat... (Mohon tunggu atau izinkan akses)";
+
+      html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback)
+        .then(() => {
+          scanResult.innerHTML = "Arahkan kamera ke QR Code Akses.";
+        })
+        .catch((err) => {
+          console.error("Gagal start kamera:", err);
+          scanResult.innerHTML = "❌ Gagal mengakses kamera. Coba lagi atau pastikan Live Server/HTTPS aktif.";
+          resetScanPage();
+        });
+    }
+
+    function stopScanner() {
+      if (html5QrCode && html5QrCode.isScanning) {
+        html5QrCode.stop()
+          .then(() => console.log("Scanner dihentikan."))
+          .catch(err => console.log("Gagal menghentikan scanner: ", err));
+      }
+    }
+
+    function resetScanPage() {
+      document.getElementById('scanButtonContainer').style.display = 'block';
+      document.getElementById('reader').style.display = 'none';
+      if (document.getElementById("scan-result").innerHTML !== "❌ Gagal mengakses kamera. Coba lagi atau pastikan Live Server/HTTPS aktif.") {
+        document.getElementById("scan-result").innerHTML = "";
+      }
+      stopScanner();
+    }
+
+    // REVISI KECIL UNTUK MEMASTIKAN ALUR
+    function startScanningUserAction() {
+      stopScanner(); // 1. Pastikan scanner sebelumnya berhenti
+      document.getElementById('scanButtonContainer').style.display = 'none';
+      document.getElementById('reader').style.display = 'block';
+      document.getElementById("scan-result").innerHTML = "Meminta akses kamera... Mohon izinkan browser.";
+      // Tambahkan timeout untuk memastikan DOM dirender sebelum memulai scanner
+      setTimeout(startScanner, 100);
+    }
+
+    // --- FUNGSI PENGATUR TAMPILAN (GLOBAL SCOPE) ---
+
+    function setView(page) {
+      // Panggil stopScanner() saat keluar dari halaman siswa untuk mematikan kamera
+      if (page !== 'siswa') {
+        stopScanner();
+      }
+
+      scanPage.style.display = 'none';
+      inputDataPage.style.display = 'none';
+      loginPage.style.display = 'none';
+      operatorPage.style.display = 'none';
+      mainHeader.style.display = 'flex';
+
+      const menuBtn = document.querySelector('.menu-btn');
+      menuBtn.style.display = 'none';
+
+      if (page === 'siswa') {
+        scanPage.style.display = 'block';
+        headerTitle.textContent = '📚 Sistem Perpustakaan';
+        menuBtn.style.display = 'block';
+        resetScanPage(); // Reset tampilan scanner saat kembali ke halaman siswa
+      } else if (page === 'input') {
+        inputDataPage.style.display = 'block';
+        headerTitle.textContent = '📚 Peminjaman Buku';
+        menuBtn.style.display = 'none';
+      } else if (page === 'login') {
+        loginPage.style.display = 'block';
+        document.getElementById("popupMenu").style.display = "none";
+        headerTitle.textContent = 'Login Operator';
+      } else if (page === 'operator') {
+        mainHeader.style.display = 'none';
+        operatorPage.style.display = 'flex';
+        const firstSidebarButton = document.querySelector('.sidebar button');
+        if (firstSidebarButton) {
+          showMenu('dashboard', firstSidebarButton);
+        }
+      }
+    }
+
+    // Fungsi Helper untuk menghitung stok tersedia
+    function getTersedia(book) {
+      const pinjamCount = activePeminjaman.filter(p => p.bookID == book.id).length;
+      return (book.stok || 10) - pinjamCount;
+    }
+
+    // --- FUNGSI ALUR PEMINJAMAN SISWA ---
+
+    // index.html: Cari fungsi showInputPageWithSelection()
+    function showInputPageWithSelection() {
+      const activeBukuData = bukuData.length > 0 ? bukuData : bukuDummy;
+
+      // 1. Buat opsi pilihan buku
+      let options = '<option value="">-- Pilih Buku & Rak --</option>';
+      activeBukuData.forEach(book => {
+        const tersedia = getTersedia(book);
+        if (tersedia > 0) { // Hanya tampilkan buku yang stoknya > 0
+          const rakDisplay = book.rak ? ` (Rak: ${book.rak})` : '';
+          options += `<option value="${book.id}" data-judul="${book.judul}">${book.judul}${rakDisplay} [Stok: ${tersedia}]</option>`;
+        }
+      });
+
+      // 2. Masukkan ke elemen select
+      const selectElement = document.getElementById('selectBook');
+      if (selectElement) {
+        selectElement.innerHTML = options;
+      }
+
+      // 3. Reset input data diri
+      document.getElementById('peminjamNama').value = '';
+      document.getElementById('peminjamKelas').value = '';
+
+      // Tombol konfirmasi tidak perlu didisable lagi karena validasi dilakukan di confirmPeminjaman
+      document.getElementById('confirmButton').disabled = false;
+
+      // 4. Pindah ke halaman input
+      setView('input');
+    }
+
+    async function confirmPeminjaman() {
+      const selectElement = document.getElementById('selectBook');
+      const bookID = selectElement ? selectElement.value : "";
+
+      const peminjamNama = document.getElementById('peminjamNama')?.value.trim() || "";
+      const peminjamKelas = document.getElementById('peminjamKelas')?.value.trim() || "";
+
+      if (!bookID) {
+        alert("⚠️ Pilih buku terlebih dahulu!");
+        return;
+      }
+      if (!peminjamNama || !peminjamKelas) {
+        alert("⚠️ Nama dan kelas peminjam wajib diisi!");
+        return;
+      }
+
+      const bookTitleText = selectElement.options[selectElement.selectedIndex].text;
+
+      const bookTitle = bookTitleText.split(" (Rak:")[0].trim();
+
+      let rak = "-";
+      const rakMatch = bookTitleText.match(/Rak:\s*(.*?)\)/);
+      if (rakMatch) rak = rakMatch[1];
+
+      const today = new Date();
+      const tenggat = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000)
+        .toISOString().split("T")[0];
+
+      const peminjamanData = {
+        nama: peminjamNama,
+        kelas: peminjamKelas,
+        id_buku: bookID,
+        judul: bookTitle,
+        rak: rak,
+        tenggat: tenggat
+      };
+
+      try {
+        const res = await fetch(API_BASE_URL + "add_peminjaman.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(peminjamanData)
+        });
+
+        const data = await res.json();
+
+        if (data.status === "success") {
+          alert(`✅ Peminjaman "${bookTitle}" berhasil dicatat.`);
+          loadData();
+          setView("siswa");
+        } else {
+          alert("❌ Gagal mencatat peminjaman: " + data.message);
+        }
+
+      } catch (err) {
+        alert("❌ Gagal menghubungi server API.");
+        console.error(err);
+      }
+    }
+
+    async function loadPeminjaman(status = "tidak") {
+      try {
+        const res = await fetch(API_BASE_URL + "get_peminjaman.php?status=" + status);
+        const data = await res.json();
+
+        let html = `
+          <table>
+            <thead>
+              <tr>
+                <th>Nama</th>
+                <th>Kelas</th>
+                <th>Judul Buku</th>
+                <th>Tanggal Pinjam</th>
+                <th>Tenggat</th>
+                <th>Status</th>
+                ${status === "tidak" ? "<th>Aksi</th>" : ""}
+              </tr>
+            </thead>
+            <tbody>
+        `;
+
+        data.forEach(d => {
+          html += `
+            <tr>
+              <td>${d.nama}</td>
+              <td>${d.kelas}</td>
+              <td>${d.judul}</td>
+              <td>${d.tanggal_pinjam}</td>
+              <td>${d.tenggat || "-"}</td>
+              <td>${d.dikembalikan === "ya" ? "✅ Dikembalikan" : "⏳ Dipinjam"}</td>
+              ${status === "tidak" ? `<td><button onclick="kembalikanBuku(${d.id})">Kembalikan</button></td>` : ""}
+            </tr>
+          `;
+        });
+
+        html += `</tbody></table>`;
+        document.getElementById("mainContent").innerHTML = html;
+      } catch (err) {
+        alert("❌ Gagal memuat data peminjaman.");
+        console.error(err);
+      }
+    }
+
+    async function kembalikanBuku(id) {
+      if (!confirm("Apakah buku ini sudah dikembalikan?")) return;
+
+      try {
+        const res = await fetch(API_BASE_URL + "update_pengembalian.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id })
+        });
+
+        const data = await res.json();
+        if (data.status === "success") {
+          alert("✅ Buku telah dikembalikan.");
+          loadPeminjaman("tidak"); // refresh daftar aktif
+        } else {
+          alert("❌ " + data.message);
+        }
+      } catch (err) {
+        alert("❌ Gagal menghubungi server.");
+        console.error(err);
+      }
+    }
+
+    function openLogin() {
+      setView('login');
+    }
+
+    // --------- Login & Logout ----------
+    async function login() {
+      const u = document.getElementById("username").value.trim();
+      const p = document.getElementById("password").value.trim();
+
+      try {
+        const res = await fetch(API_BASE_URL + "login_operator.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: u, password: p })
+        });
+
+        const data = await res.json();
+
+        if (data.status === "success") {
+          setView("operator");
+          loadData();
+        } else {
+          alert("Login gagal: " + data.message);
+        }
+      } catch (err) {
+        alert("Tidak dapat menghubungi server login.");
+      }
+    }
+
+    function logout() {
+      setView('siswa');
+    }
+
+    // --------- Load JSON Data ----------
+    async function loadData() {
+      const apiCalls = [
+        { name: "Buku", url: API_BASE_URL + "get_buku.php" },
+        { name: "Peminjaman", url: API_BASE_URL + "get_peminjaman.php" },
+        // Mengambil daftar peminjam unik dari peminjaman table
+        { name: "Siswa List", url: API_BASE_URL + "get_peminjaman.php?type=siswa_list" }
+      ];
+
+      try {
+        // Menunggu semua panggilan API selesai
+        const responses = await Promise.all(apiCalls.map(api => fetch(api.url)));
+
+        let errorMessages = [];
+
+        // 1. Ambil Data Buku (Index 0)
+        if (responses[0].ok) {
+          bukuData = await responses[0].json();
+
+          // --- PERBAIKAN KRITIS: Panggil fungsi render UI setelah data tersedia ---
+          // Ini akan memastikan daftar buku/dropdown terisi.
+          tampilkanBukuPadaUI(bukuData);
+          // Anda mungkin juga perlu memanggil fungsi untuk mengisi dropdown buku di sini
+          // (Jika pengisian dropdown buku tidak terjadi secara otomatis oleh showInputPageWithSelection)
+          // Contoh: updateBookSelectionDropdown(bukuData); 
+          // --- END PERBAIKAN KRITIS ---
+
+        } else {
+          console.error(`❌ Gagal memuat data ${apiCalls[0].name}: Status ${responses[0].status}`);
+          bukuData = bukuDummy;
+          errorMessages.push(`Buku (Status ${responses[0].status})`);
+        }
+
+        // 2. Ambil Data Peminjaman (Index 1)
+        if (responses[1].ok) {
+          peminjamanData = await responses[1].json();
+        } else {
+          console.error(`❌ Gagal memuat data ${apiCalls[1].name}: Status ${responses[1].status}`);
+          peminjamanData = peminjamanDummy;
+          errorMessages.push(`Peminjaman (Status ${responses[1].status})`);
+        }
+
+        // 3. Ambil Data Siswa Unik (Index 2)
+        if (responses[2].ok) {
+          activeSiswaData = await responses[2].json();
+        } else {
+          console.error(`❌ Gagal memuat data ${apiCalls[2].name}: Status ${responses[2].status}`);
+          activeSiswaData = [];
+          errorMessages.push(`Siswa List (Status ${responses[2].status})`);
+        }
+
+        // Cek Peminjaman Aktif (data yang belum dikembalikan)
+        activePeminjaman = peminjamanData.filter(p => p.dikembalikan === 'tidak');
+
+        if (errorMessages.length > 0) {
+          alert("⚠️ Peringatan! Gagal memuat data untuk: " + errorMessages.join(', ') + ". Cek XAMPP/PHP file Anda.");
+        }
+
+      } catch (err) {
+        console.error("❌ KONEKSI GAGAL TOTAL. Cek XAMPP atau API URL:", err);
+        alert("❌ KONEKSI GAGAL TOTAL. Periksa XAMPP dan alamat API Anda.");
+        setView("login");
+      }
+    }
+    async function loadSiswa() {
+      try {
+        // Panggil API baru untuk mendapatkan daftar peminjam unik
+        const res = await fetch(API_BASE_URL + "get_peminjaman.php?type=siswa_list");
+        const data = await res.json();
+
+        // Render data siswa (peminjam unik)
+        renderSiswaTable(data);
+      } catch (err) {
+        console.error("Gagal memuat data daftar peminjam unik:", err);
+        renderSiswaTable([]); // Tampilkan tabel kosong jika gagal
+      }
+    }
+
+    // index.html: Fungsi baru untuk merender tabel Daftar Siswa/Peminjam Unik
+    function renderSiswaTable(data) {
+      const siswaTableBody = document.getElementById('siswaTableBody');
+      const main = document.getElementById("mainContent");
+
+      if (data.length === 0) {
+        main.innerHTML = `
+              <h2>👨‍🎓 Daftar Peminjam Unik</h2>
+              <p>Belum ada data peminjam yang tercatat di riwayat peminjaman.</p>
+              <table><thead><tr><th>No.</th><th>Nama</th><th>Kelas</th><th>Aksi</th></tr></thead><tbody>
+              <tr><td colspan="4" style="text-align:center;">Tidak ada data peminjam.</td></tr>
+              </tbody></table>
+            `;
+        return;
+      }
+
+      let rows = data.map((siswa, index) => {
+        // Tombol Hapus & Lihat Riwayat di-nonaktifkan karena data ini hanya tampilan unik
+        return `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${siswa.nama}</td>
+                    <td>${siswa.kelas}</td>
+                    <td><button disabled style="background:#ddd; color:#555; border:none; padding:5px 10px; border-radius:4px; cursor:default;">Lihat Riwayat</button></td>
+                </tr>
+            `;
+      }).join("");
+
+      main.innerHTML = `
+            <h2>👨‍🎓 Daftar Peminjam Unik</h2>
+            <p>Data ini diambil dari riwayat peminjaman yang unik (Nama & Kelas).</p>
+            <table>
+                <thead><tr><th>No.</th><th>Nama</th><th>Kelas</th><th>Aksi</th></tr></thead>
+                <tbody>${rows}</tbody>
+            </table>
+        `;
+    }
+
+    // --- FUNGSI QR CODE GENERATION (Buku & Akses) ---
+    let qrCodeInstance = null;
+    let qrAccessInstance = null; // VARIABEL BARU
+
+    function generateQRCode(bookId, bookTitle) {
+      const container = document.getElementById('qrcodeContainer');
+      const canvas = document.getElementById('qrcodeCanvas');
+      const titleSpan = document.getElementById('qrBookTitle');
+
+      canvas.innerHTML = '';
+
+      container.style.display = 'block';
+      titleSpan.textContent = `Buku: ${bookTitle} (ID: ${bookId})`;
+
+      qrCodeInstance = new QRCode(canvas, {
+        text: String(bookId),
+        width: 128,
+        height: 128,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+      });
+    }
+
+    // FUNGSI BARU UNTUK MENGUNDUH QR CODE AKSES
+    function downloadQrCodeAccess() {
+      const downloadBtn = document.getElementById('downloadQrAccessBtn');
+      const imageUrl = downloadBtn ? downloadBtn.getAttribute('data-url') : null;
+      const filename = downloadBtn ? downloadBtn.getAttribute('data-filename') : 'QR_Code.png';
+
+      if (!imageUrl) {
+        // Alert ini muncul karena tombol belum mendapatkan data-url dari QR Code
+        alert("QR Code belum siap untuk diunduh. Coba tunggu sebentar.");
+        return;
+      }
+
+      // Buat elemen <a> sementara
+      const link = document.createElement('a');
+      link.href = imageUrl;
+      link.download = filename;
+
+      // Picu klik dan hapus
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      alert("✅ QR Code Akses Peminjaman berhasil diunduh!");
+    }
+
+    // FUNGSI BARU UNTUK QR CODE AKSES
+    function generateQrAccessCode() {
+      const qrAccessCanvas = document.getElementById('qrAccessCanvas');
+      if (!qrAccessCanvas) return;
+
+      qrAccessCanvas.innerHTML = '';
+
+      const accessUrl = "http://localhost/PKMv2/index.html?action=pinjam";
+
+      new QRCode(qrAccessCanvas, {
+        text: accessUrl,
+        width: 250,
+        height: 250,
+      });
+
+      // Instansiasi QRCode
+      qrAccessInstance = new QRCode(qrAccessCanvas, {
+        text: accessUrl,
+        width: 200,
+        height: 200,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+      });
+      console.log("QR Code Akses digenerate dengan URL:", accessUrl);
+      document.getElementById('qrAccessUrlDisplay').textContent = accessUrl;
+
+      // SETELAH QR CODE TERBENTUK (perlu sedikit delay)
+      setTimeout(() => {
+        // Tambahkan data-url ke elemen tombol atau simpan ke variabel global
+        const canvasElement = qrAccessCanvas.querySelector('canvas');
+        if (canvasElement) {
+          const dataUrl = canvasElement.toDataURL("image/png");
+          // Simpan Data URL di tombol unduh
+          const downloadBtn = document.getElementById('downloadQrAccessBtn');
+          if (downloadBtn) {
+            downloadBtn.setAttribute('data-url', dataUrl);
+            downloadBtn.setAttribute('data-filename', 'QR_Akses_Peminjaman.png');
+          }
+        }
+      }, 500); // Tunggu sebentar agar canvas selesai digenerate
+    }
+
+    // --------- Menu Switch (Operator) ----------
+    function showMenu(menu, buttonElement) {
+      const main = document.getElementById("mainContent");
+
+      document.querySelectorAll('.sidebar button').forEach(btn => btn.classList.remove('active'));
+      if (buttonElement) buttonElement.classList.add('active');
+      const activeBukuData = bukuData.length > 0 ? bukuData : bukuDummy;
+      const mainContent = document.getElementById("mainContent"); // Pastikan ini juga ada
+
+      if (menu === "dashboard") {
+        // ... (kode dashboard tetap sama) ...
+        const totalDikembalikan = peminjamanData.filter(d => d.dikembalikan === 'ya').length;
+        main.innerHTML = `
+        <h2>📊 Dashboard Ringkasan</h2>
+        <ul>
+            <li>Total Buku: <strong>${activeBukuData.length}</strong></li>
+            <li>Peminjaman Aktif: <strong>${activePeminjaman.length}</strong></li>
+            <li>Buku Telah Dikembalikan: <strong>${peminjamanData.filter(d => d.dikembalikan === 'ya').length}</strong></li>
+        </ul>
+    `;
+      }
+      else if (menu === "aktif") {
+        let rows = activePeminjaman.map(p => `
+          <tr>
+            <td>${p.bookTitle} (${p.rak})</td>
+            <td>${p.nama} (${p.kelas})</td>
+            <td>${p.tglPinjam}</td>
+            <td>${p.tenggat}</td>
+            <td>
+              <button onclick="kembalikanBuku(${p.id})"
+                  style="background:#e53e3e; color:white; border:none; padding:4px 8px; border-radius:4px;">
+                  Kembalikan
+              </button>
+            </td>
+          </tr>
+        `).join("");
+
+        if (activePeminjaman.length === 0) {
+          rows = `<tr><td colspan="5" style="text-align:center;">Saat ini tidak ada buku yang sedang dipinjam.</td></tr>`;
+        }
+
+        main.innerHTML = `
+          <h2>📗 Daftar Peminjaman Aktif</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Judul Buku</th>
+                <th>Nama (Kelas)</th>
+                <th>Tgl Pinjam</th>
+                <th>Tenggat</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>`;
+      }
+      else if (menu === "terlambat") {
+        main.innerHTML = `
+          <h2>⏰ Daftar Keterlambatan</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Judul Buku</th>
+                <th>Nama</th>
+                <th>Kelas</th>
+                <th>Tenggat</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="lateTableBody">
+              <tr><td colspan="5" style="text-align:center;">Tidak ada buku terlambat.</td></tr>
+            </tbody>
+          </table>`;
+      }
+      else if (menu === "buku") {
+        // ... (kode buku tetap sama) ...
+        let rows = activeBukuData.map(b => {
+          const tersedia = getTersedia(b);
+
+          return `
+        <tr>
+          <td>${b.id}</td>
+          <td>${b.judul}</td>
+          <td>${b.pengarang || 'N/A'}</td>
+          <td>${b.rak || 'N/A'}</td>
+          <td>${b.stok || 10}</td>
+          <td>${tersedia}</td>
+          <td>
+          <button onclick="deleteBuku(${b.id})" 
+            style="background:#e53e3e;color:white;border:none;padding:5px 10px;border-radius:4px;cursor:pointer;margin-left:5px;">
+            🗑️
+          </button>
+        </td>
+        </tr>
+      `;
+        }).join("");
+
+        main.innerHTML = `
+        <h2>📖 Katalog & Stok Buku</h2>
+        <div id="qrcodeContainer" style="margin-bottom: 20px; padding: 10px; border: 1px dashed #ccc; display: none;">
+            <h3>QR Code untuk <span id="qrBookTitle"></span></h3>
+            <div id="qrcodeCanvas" style="display: inline-block; padding: 5px; background: white; border: 1px solid #000;"></div>
+            <p style="margin-top: 10px;"><button onclick="printQRCode()" style="background:#f6ad55; color:white; border:none; padding:8px 12px; border-radius:4px; cursor:pointer;">🖨️ Cetak</button></p>
+        </div>
+
+        <button onclick="openForm('buku')" style="margin:10px 0; background:#2b6cb0; color:white; border:none; padding:8px 12px; border-radius:4px; cursor:pointer;">➕ Tambah Buku Baru</button>
+        <table>
+          <thead><tr><th>ID</th><th>Judul</th><th>Pengarang</th><th>Rak</th><th>Total Stok</th><th>Tersedia</th><th>Aksi</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+      }
+      // BLOK BARU UNTUK QR AKSES
+      // index.html: Di dalam fungsi showMenu(menu, buttonElement)
+      // index.html: Di dalam fungsi showMenu(menu, buttonElement)
+      else if (menu === "qr_akses") {
+        main.innerHTML = `<div id="qrAccessPage" style="max-width:600px; margin:auto; padding:20px; background:white; border-radius:12px; box-shadow:0 0 10px rgba(0,0,0,0.1);">
+          <h2>📱 QR Code Akses Peminjaman</h2>
+          <p>Scan QR Code ini untuk langsung menuju halaman peminjaman buku.</p>
+          <div id="qrAccessCanvas" style="display: inline-block; padding: 10px; background: white; border: 1px solid #000; margin-top: 15px;"></div>
+          <p style="margin-top: 20px;">
+              <button **onclick="downloadQrCodeAccess()" id="downloadQrAccessBtn"** style="background:#2b6cb0; color:white; border:none; padding:8px 12px; border-radius:4px; cursor:pointer;">⬇️ Unduh QR Code</button>
+          </p>
+          <p style="margin-top: 15px; font-size: 14px; color: #555;">
+              *QR Code ini akan mengarahkan ke URL: <code id="qrAccessUrlDisplay"></code>
+          </p>
+      </div>`;
+        // >> PERBAIKAN: PANGGIL FUNGSI INI DI SINI!
+        generateQrAccessCode();
+      }
+      // END BLOK BARU
+      else if (menu === "siswa") {
+        // KODE YANG BENAR: Panggil fungsi loading yang akan merender isi mainContent
+        loadSiswa();
+        return;
+      }
+      else if (menu === "peminjaman") {
+        // Pastikan elemen utama sudah siap dan terlihat
+        setTimeout(() => {
+          const main = document.getElementById("mainContent");
+          if (!main) return alert("Elemen utama belum siap!");
+          loadPeminjaman("tidak");
+        }, 300);
+      }
+      else if (menu === "riwayat") {
+        const main = document.getElementById("mainContent");
+        if (!main) return alert("Elemen utama belum siap!");
+        loadPeminjaman("ya");
+      }
+      else if (menu === "pengaturan") {
+        const isDarkModeChecked = localStorage.getItem("darkmode") === "true" ? "checked" : "";
+        main.innerHTML = `
+        <div class="fade">
+
+          <h2>⚙️ Pengaturan Sistem</h2>
+
+          <h3>🔐 Ganti Username & Password Operator</h3>
+          <div class="settings-box">
+            <label>Username Baru:</label>
+            <input id="newUsername" type="text" placeholder="Username baru">
+
+            <div class="password-wrapper">
+                <input type="password" id="passwordOperator" placeholder="Password Lama">
+                <span class="toggle-eye" onclick="togglePassword('passwordOperator')">👁️</span>
+            </div>
+
+            <div class="password-wrapper">
+                <input type="password" id="passwordBaru" placeholder="Password Baru">
+                <span class="toggle-eye" onclick="togglePassword('passwordBaru')">👁️</span>
+            </div>
+
+            <div class="password-wrapper">
+                <input type="password" id="passwordKonfirmasi" placeholder="Konfirmasi Password Baru">
+                <span class="toggle-eye" onclick="togglePassword('passwordKonfirmasi')">👁️</span>
+            </div>
+
+            <button onclick="saveOperatorSettings()" class="btn-primary">Simpan Perubahan</button>
+          </div>
+
+          <h3>🌓 Mode Gelap</h3>
+          <div class="settings-box">
+              <h3>Mode Tampilan</h3>
+              <label class="switch">
+                  <input type="checkbox" id="darkToggle" onchange="toggleDarkMode()" ${isDarkModeChecked}>
+                  <span class="slider round"></span>
+              </label>
+              <span>Mode Gelap</span>
+          </div>
+
+          <h3>ℹ️ Tentang Sistem</h3>
+            <div class="settings-box">
+
+              <p>Nama Aplikasi: Sistem Peminjaman Buku Perpustakaan</p>
+              <p>Versi: 2.0.0</p>
+
+              <br>
+
+              <p>Tujuan Sistem:</p>
+              <p>- Mempermudah peminjaman dan pengembalian buku menggunakan QR Code</p>
+              <p>- Membantu operator mengelola data buku dan riwayat peminjaman</p>
+              <p>- Menyediakan tampilan sederhana untuk siswa setelah scan QR</p>
+
+              <br>
+
+              <p>Riwayat Versi:</p>
+              <p>v2.0.0 — Penambahan sistem login operator yabg lebih canggih, pengaturan akun, mode gelap, dan database baru</p>
+              <p>v1.0.0 — Versi awal: peminjaman dasar, scan QR, katalog buku</p>
+
+            </div>
+
+        </div>
+        `;
+      }
+    }
+
+    // Panggil setView('siswa') saat halaman dimuat
+    document.addEventListener('DOMContentLoaded', async () => {
+      setView("siswa");
+      await loadData();
+
+      // LOGIKA BARU: Cek parameter URL untuk langsung ke halaman peminjaman
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('action') === 'pinjam') {
+        showInputPageWithSelection();
+      }
+    });
+
+    // --- GLOBAL VARIABEL TAMBAHAN ---
+    let currentFormType = ""; // "siswa" atau "buku"
+
+    // --- FUNGSI TAMPIL FORM TAMBAH ---
+    function openForm(type) {
+      currentFormType = type;
+      const modal = document.getElementById("formModal");
+      const formTitle = document.getElementById("formTitle");
+      const formFields = document.getElementById("formFields");
+
+      if (type === "buku") {
+        formTitle.textContent = "Tambah Buku Baru";
+        formFields.innerHTML = `
+          <label>Judul:</label><br><input id="judul" style="width:100%;margin-bottom:8px;"><br>
+          <label>Pengarang:</label><br><input id="pengarang" style="width:100%;margin-bottom:8px;"><br>
+          <label>Tahun:</label><br><input id="tahun" style="width:100%;margin-bottom:8px;" type="number"><br>
+          <label>Rak:</label><br><input id="rak" style="width:100%;margin-bottom:8px;"><br>
+          <label>Stok:</label><br><input id="stok" style="width:100%;margin-bottom:8px;" type="number" value="1">
+        `;
+      }
+
+      modal.style.display = "flex";
+    }
+
+    // Tutup form
+    function closeForm() {
+      document.getElementById("formModal").style.display = "none";
+    }
+
+    // --- KIRIM DATA KE PHP ---
+    async function submitForm() {
+      const modal = document.getElementById("formModal");
+
+      if (currentFormType === "buku") {
+        const judul = document.getElementById("judul").value.trim();
+        const pengarang = document.getElementById("pengarang").value.trim();
+        const rak = document.getElementById("rak").value.trim();
+        const stok = document.getElementById("stok").value.trim() || 1;
+        if (!judul || !pengarang || !tahun || !rak) return alert("Lengkapi semua data buku!");
+
+        const res = await fetch(API_BASE_URL + "add_buku.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ judul, pengarang, tahun, rak, stok })
+        });
+        const data = await res.json();
+        alert(data.status === "success" ? "✅ Buku berhasil ditambahkan!" : "❌ Gagal menambah buku.");
+      }
+
+      modal.style.display = "none";
+      loadData(); // Refresh tabel
+    }
+
+    async function deleteBuku(id) {
+      if (!confirm("⚠️ Yakin ingin menghapus buku ini?")) return;
+
+      const res = await fetch(API_BASE_URL + "delete_buku.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id })
+      });
+      const data = await res.json();
+
+      if (data.status === "success") {
+        alert("✅ Buku berhasil dihapus!");
+        loadData();
+      } else {
+        alert("❌ Gagal menghapus buku: " + data.message);
+      }
+    }
+
+    // ---------------------------
+    // 1. Update Username / Password Operator
+    // ---------------------------
+    function updateOperator() {
+      const oldP = document.getElementById("passwordOperator").value.trim();
+      const newP = document.getElementById("passwordBaru").value.trim();
+      const confP = document.getElementById("passwordKonfirmasi").value.trim();
+
+      if (!oldP || !newP || !confP) {
+        alert("Semua field harus diisi.");
+        return;
+      }
+
+      if (newP !== confP) {
+        alert("Password baru dan konfirmasi tidak cocok.");
+        return;
+      }
+
+      if (newP.length < 4) {
+        alert("Password baru minimal 4 karakter.");
+        return;
+      }
+
+      // SIMPAN PASSWORD BARU
+      localStorage.setItem("operatorPassword", newP);
+
+      alert("Password berhasil diperbarui!");
+    }
+
+
+    // ---------------------------
+    // 2. Mode Gelap / Mode Terang
+    // ---------------------------
+    // index.html: Di dalam tag <script> Anda
+
+    function toggleDarkMode() {
+      const isChecked = document.getElementById("darkToggle").checked;
+
+      if (isChecked) {
+        // Jika saklar DICENTANG (di-ON-kan)
+        document.body.classList.add("dark");
+        localStorage.setItem("darkmode", "true");
+      } else {
+        // Jika saklar TIDAK DICENTANG (di-OFF-kan)
+        document.body.classList.remove("dark");
+        localStorage.setItem("darkmode", "false");
+      }
+    }
+
+    // Load mode gelap saat buka halaman
+    document.addEventListener("DOMContentLoaded", () => {
+      if (localStorage.getItem("darkmode") === "true") {
+        document.body.classList.add("dark");
+        const toggle = document.getElementById("darkToggle");
+        if (toggle) toggle.checked = true;
+      }
+    });
+
+    function togglePassword(id) {
+      const input = document.getElementById(id);
+      if (!input) return;
+
+      input.type = (input.type === "password") ? "text" : "password";
+    }
+    // index.html: Ganti fungsi saveOperatorSettings() Anda
+
+    async function saveOperatorSettings() {
+      const user = document.getElementById("newUsername").value.trim();
+      const oldP = document.getElementById("passwordOperator").value.trim();
+      const newP1 = document.getElementById("passwordBaru").value.trim();
+      const newP2 = document.getElementById("passwordKonfirmasi").value.trim();
+
+      // 2. Validasi Input
+      if (!oldP || !newP1 || !newP2) {
+        alert("Semua field password harus diisi.");
+        return;
+      }
+
+      if (newP1 !== newP2) {
+        alert("Password baru dan konfirmasi tidak cocok.");
+        return;
+      }
+
+      if (newP1.length < 4) {
+        alert("Password baru minimal 4 karakter.");
+        return;
+      }
+
+      // 3. KIRIM DATA KE update_operator.php
+      const res = await fetch(API_BASE_URL + "update_operator.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          // Kunci PHP: 'usernameBaru' | Nilai JS: user (dari newUsername)
+          usernameBaru: user,
+          oldPass: oldP,
+          newPass: newP1
+        })
+      });
+
+      const data = await res.json();
+
+      // 4. Tangani Respons
+      if (data.status === "success") {
+        alert("✔️ Username/Password berhasil diubah!");
+        // Tutup pop-up menu
+        document.getElementById("popupMenu").style.display = 'none';
+
+        // Opsional: Perbarui tampilan header/menu jika perlu
+        loadData();
+      } else {
+        alert("❌ Gagal mengubah: " + data.message);
+      }
+    }
+
+    function loadBooksFromServer() {
+      // Dibungkus dengan Promise agar bisa di-await oleh loadData()
+      return new Promise((resolve, reject) => {
+        fetch("http://localhost/PKMv2/api/get_buku.php")
+          .then(res => res.json())
+          .then(data => {
+            console.log("Data buku dari server:", data);
+            tampilkanBukuPadaUI(data);
+            resolve(); // Berhasil
+          })
+          .catch(err => {
+            console.error("Gagal mengambil data:", err);
+            alert("Tidak bisa memuat data buku dari server.");
+            reject(err); // Gagal
+          });
+      });
+    }
+
+    function tampilkanBukuPadaUI(data) {
+      const list = document.getElementById("bookList");
+
+      // PENCEGAHAN CRASH (Fix masalah sebelumnya)
+      if (list === null) {
+        console.warn("Elemen 'bookList' tidak ditemukan. Lewati rendering UI buku.");
+        return;
+      }
+
+      list.innerHTML = "";
+
+      data.forEach(buku => {
+        const item = document.createElement("div");
+        item.className = "bookItem";
+        item.innerHTML = `
+            <strong>${buku.judul}</strong><br>
+            Rak: ${buku.rak}<br>
+            Stok: ${buku.stok}
+        `;
+        list.appendChild(item);
+      });
+    }
+
+  </script>

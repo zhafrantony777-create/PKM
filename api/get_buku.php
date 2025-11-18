@@ -7,14 +7,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 // KRITIS: KONEKSI KE perpustakaan_simpel
-$conn = new mysqli("http://202.10.40.254", "root", "", "perpustakaan_simpel"); 
+// $conn = new mysqli("http://202.10.40.254", "root", "", "perpustakaan_simpel"); 
+include 'conn.php';
 if ($conn->connect_error) {
   // Jika koneksi DB gagal, kirim status 500
   http_response_code(500);
   echo json_encode(["status" => "error", "message" => "Koneksi database gagal: " . $conn->connect_error]);
   exit;
 }
-
 // Ambil semua data buku
 $sql = "SELECT * FROM buku ORDER BY judul ASC";
 

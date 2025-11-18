@@ -5,7 +5,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-$conn = new mysqli("http://202.10.40.254", "root", "", "perpustakaan_simpel");
+// $conn = new mysqli("http://202.10.40.254", "root", "", "perpustakaan_simpel");
+include 'conn.php';
 if ($conn->connect_error) {
     echo json_encode(["status"=>"error", "message"=>"DB error"]);
     exit;

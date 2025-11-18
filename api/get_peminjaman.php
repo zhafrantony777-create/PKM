@@ -7,7 +7,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 // KRITIS: KONEKSI KE perpustakaan_simpel
-$conn = new mysqli("localhost", "root", "", "perpustakaan_simpel");
+$conn = new mysqli("http://202.10.40.254", "root", "", "perpustakaan_simpel");
 if ($conn->connect_error) {
   echo json_encode(["status" => "error", "message" => $conn->connect_error]);
   exit;

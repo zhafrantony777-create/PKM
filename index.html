@@ -398,7 +398,8 @@
     const loginPage = document.getElementById("loginPage");
     const operatorPage = document.getElementById("operatorPage");
     const headerTitle = document.getElementById("headerTitle");
-    const API_BASE_URL = "http://202.10.40.254/api/"; // Ganti http://localhost/PKMv2/api/ menjadi 'api/'
+    // const API_BASE_URL = "http://202.10.40.254/api/"; // Ganti http://localhost/PKMv2/api/ menjadi 'api/'
+    const API_BASE_URL = "api/"; // Ganti http://localhost/PKMv2/api/ menjadi 'api/'
     let bukuData = [];
     let peminjamanData = []; // Menyimpan semua riwayat pinjam (ya & tidak)
     let activePeminjaman = []; // Menyimpan pinjaman yang dikembalikan = 'tidak'
@@ -722,14 +723,13 @@
     async function loadData() {
       const apiCalls = [
         { name: "Buku", url: API_BASE_URL + "get_buku.php" },
-        { name: "Peminjaman", url: API_BASE_URL + "get_peminjaman.php" },
+        { name: "Peminjaman", url: API_BASE_URL + "get_peminjaman.php"},
         // Mengambil daftar peminjam unik dari peminjaman table
         { name: "Siswa List", url: API_BASE_URL + "get_peminjaman.php?type=siswa_list" }
       ];
 
       try {
         const responses = await Promise.all(apiCalls.map(api => fetch(api.url)));
-
         let errorMessages = [];
 
         // 1. Ambil Data Buku (Index 0)

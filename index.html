@@ -399,7 +399,7 @@
     const operatorPage = document.getElementById("operatorPage");
     const headerTitle = document.getElementById("headerTitle");
     // const API_BASE_URL = "http://202.10.40.254/api/"; // Ganti http://localhost/PKMv2/api/ menjadi 'api/'
-    const API_BASE_URL = "api/"; // Ganti http://localhost/PKMv2/api/ menjadi 'api/'
+    const API_BASE_URL = "http://202.10.40.254/api"; // Ganti http://localhost/PKMv2/api/ menjadi 'api/'
     let bukuData = [];
     let peminjamanData = []; // Menyimpan semua riwayat pinjam (ya & tidak)
     let activePeminjaman = []; // Menyimpan pinjaman yang dikembalikan = 'tidak'
@@ -880,13 +880,8 @@
 
       qrAccessCanvas.innerHTML = '';
 
-      const accessUrl = "http://localhost/PKMv2/index.html?action=pinjam";
-
-      new QRCode(qrAccessCanvas, {
-        text: accessUrl,
-        width: 250,
-        height: 250,
-      });
+      const DOMAIN_HOSTING = "http://perpusman2tangerang.my.id/"; // <-- GANTI DENGAN DOMAIN ASLI ANDA
+      const accessUrl = DOMAIN_HOSTING + window.location.pathname + "?action=pinjam";
 
       // Instansiasi QRCode
       qrAccessInstance = new QRCode(qrAccessCanvas, {
